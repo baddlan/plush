@@ -43,16 +43,16 @@ object Users extends Controller {
       user => {
         val username = (Security.username -> user._1)
         request.session.get("uriBeforeLogin") map { uri =>
-          Redirect(uri).withSession(session - "uriBeforeLogin" + username)
+          Redirect(uri).withSession(request.session - "uriBeforeLogin" + username)
         } getOrElse {
-          Redirect(routes.Apps.index).withSession(session + username)
+          Redirect(routes.Apps.index).withSession(request.session + username)
         }
       }
     )
   }
 
   def logout = Action { implicit request =>
-    Redirect(routes.Users.login).withSession(session - Security.username).flashing("success" -> "You are now logged out")
+    Redirect(routes.Users.login).withSession(request.session - Security.username).flashing("success" -> "You are now logged out")
   }
 
   def add = Action { implicit request =>

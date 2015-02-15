@@ -124,6 +124,9 @@ class GcmDispatchWorker extends Actor {
 
   def receive = {
     case SendGcmMessage(app, registrations, payload) => {
+
+      import play.api.Play.current
+
       val payloadWithRegistrations = payload - "registration_ids" + ("registration_ids", JsArray(registrations map (r => JsString(r.value))))
       WS.url(apiEndpoint).withRequestTimeout(timeout).withHeaders(
         "Authorization" -> ("key=" + app.gcmApiKey.getOrElse("")),
@@ -193,7 +196,7 @@ class GcmDispatchWorker extends Actor {
         val Numeric = "\\A\\d+\\Z".r
 
         retryAfterHeader match {
-          case Numeric => {
+          case s if(Numeric.unapplySeq(s).isDefined) => {
             val secs = retryAfterHeader.toInt
             val log = "GCM server returned HTTP status code %i with Retry-After - will retry in %i seconds".format(status, secs)
             Event.create(app.key, Event.Severity.ERROR, log)
